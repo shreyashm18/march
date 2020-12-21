@@ -1,0 +1,53 @@
+{% extends 'home.html' %}
+{% block content %}
+<br>
+    <table class="table table-light table-bordered table-striped">
+        <tbody>
+        <tr>
+            <th>Country</th>
+            <td>{{country}}</td>
+        </tr>
+        <tr>
+            <th>Total Cases</th>
+            <td>{{Total_patients}}</td>
+        </tr>
+        <tr>
+            <th>Total Recovery</th>
+            <td>{{Total_recovered}}</td>
+        </tr>
+        <tr>
+            <th>Total Deaths</th>
+            <td>{{total_death}}</td>
+        </tr>
+        <tr>
+            <th>New cases</th>
+            <td>{{new_confirmed}}</td>
+        </tr>
+        <tr>
+            <th>New Recovery</th>
+            <td>{{new_recovered}}</td>
+        </tr>
+        <tr>
+            <th>New Deaths</th>
+            <td>{{new_deaths}}</td>
+        </tr>
+        <tr>
+            <th>Active Cases</th>
+            <td>{{active_patient}}</td>
+        </tr>
+        <tr>
+            <th>Death Rate</th>
+            <td>{{death_rate}}</td>
+        </tr>
+        <tr>
+            <th>Recovery Rate</th>
+            <td>{{recovery_rate}}</td>
+        </tr>
+        <tr>
+            <th>Cases Per Million Population</th>
+            <td>{{cases_per_million_population}}</td>
+        </tr>
+    </tbody>
+    </table>
+    
+{% endblock content %}
