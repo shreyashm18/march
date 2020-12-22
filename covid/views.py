@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 
+from django.http import response
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import requests
@@ -11,35 +12,46 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.authtoken.models import Token
-from account.models import User_country
+from account.models import User_country, CountryList
+
+# def passToken(request):
+#     print(f'request = {request.user}')
+#     token = Token.objects.get(user=request.user)
+#     print(f'token = {token.key}')
+#     print(f'token type = {type(token.key)}')
+#     # token = token.key
+#     if token.key:
+#         endpoint = 'http://127.0.0.1:8000/covid/report/'
+#         tkn = 'Token '+token.key
+#         dict = requests.post(url=endpoint, headers = {'Authorization': tkn})
+#     return redirect('home')
+
 
 class ReportByCountry(APIView):
     
-    # authentication_classes = [TokenAuthentication]
+    authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     
-    def post(self,request, time_period = 15):
+    def get(self,request, time_period = 15):
 
         print(request.user.username)
+        # print(f'form data {request.GET}')
+        # country = (CountryList.objects.get(id = request.GET['country'])).country
+        # print(f"country == {country}")
+        # print(f"type of country == {type(country)}")
         
-        # print(f'request = {request.user}')
-        # token = Token.objects.get(user=request.user)
-        # print(f'token = {token.key}')
-        # print(f'token type = {type(token.key)}')
-        # token = token.key
-        # h = 'Token '+token
         endpoint = "http://corona-api.com/countries/"
-        if request.POST.get('country'):
-            country = request.POST['country']
+        if request.GET.get('country'):
+            country = (CountryList.objects.get(id = request.GET['country'])).country
         else:
             try:
                 cnt=User_country.objects.get(user_name=request.user.username)
                 country = cnt.country
             except User_country.DoesNotExist:
                 return redirect('home')
-        if request.POST.get('days'):
-            time_period = int(request.POST['days'])
+        if request.GET.get('days'):
+            time_period = int(request.GET['days'])
         print(f'time_period = {time_period}')
         print(f'country = {country}')
         country_name = country_code.objects.get(country = country)
@@ -72,27 +84,29 @@ class ReportByCountry(APIView):
         print(dict)
 
         return render(request,'covid.html',dict)
+        # return redirect('home')
 
 
+class UpdateCountryCodeDataBase(APIView):
+    # authentication_classes = [TokenAuthentication]
+    authentication_classes = [SessionAuthentication,BasicAuthentication]
+    permission_classes = [IsAuthenticated]
 
-# class UpdateCountryCodeDataBase(APIView):
-#     # authentication_classes = [TokenAuthentication]
-#     # # authentication_classes = [SessionAuthentication,BasicAuthentication]
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self,request):
-#         endpoint = 'https://corona-api.com/countries'
-#         response = requests.get(url=endpoint)
-#         # print(response.url)
-#         resp = response.json()
+    def get(self,request):
+        endpoint = 'https://corona-api.com/countries'
+        response = requests.get(url=endpoint)
+        # print(response.url)
+        resp = response.json()
         
-#         for country in resp['data']:
-#             try:
-#                 country_name = country_code.objects.get(country = country['name'])
-#                 if not country_name.code == country['code']:
-#                     country_name.code = country['code']
-#                     country_name.save()
-#             except country_code.DoesNotExist:
-#                 country_name = country_code.objects.create(country = country['name'], code = country['code'])
-#                 country_name.save()
-#         return redirect('home')
+        for country in resp['data']:
+            try:
+                country_name = country_code.objects.get(country = country['name'])
+                if not country_name.code == country['code']:
+                    country_name.code = country['code']
+                    country_name.save()
+            except country_code.DoesNotExist:
+                country_name = country_code.objects.create(country = country['name'], code = country['code'])
+                country_name.save()
+                cnt = CountryList.objects.create(country=country['name'])
+                cnt.save()
+        return redirect('home')

@@ -11,18 +11,19 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.decorators import login_required
 
-from .models import User_country
+from .models import User_country, CountryList
 from covid.models import country_code
-
+from .forms import UserForm,InputDataForm
 # Create your views here.
 
 def home(request):
-    cnt = country_code.objects.all()
-    return render(request,'home.html',{'cnt':cnt})
+    # cnt = country_code.objects.all()
+    form = InputDataForm()
+    return render(request,'home.html',{'form':form})
 
 
 class getUser(APIView):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self,request):
         user = User.objects.all()
@@ -34,10 +35,16 @@ class RegisterUser(APIView):
     
 
     def get(self,request):
-        return render(request,'register.html')
+        form = UserForm()
+        return render(request,'register.html',{'form':form})
 
     def post(self,request):
-        country = request.POST['country']
+        # print(f'form data {request.POST}')
+        
+        country = (CountryList.objects.get(id = request.POST['country'])).country
+        # print(f"country == {country}")
+        # print(f"type of country == {type(country)}")
+
         serialize = RegisterSerializer(data=request.POST)
         if serialize.is_valid():
             serialize.save()
@@ -70,8 +77,8 @@ class LogIn(APIView):
             return redirect(request.GET["next"])
         
         token,created=Token.objects.get_or_create(user=user)
-        # return Response({'Token is':token.key},status=200)
-        return redirect('home')
+        return Response({'Token is':token.key},status=200)
+        # return redirect('home')
 
 
 class LogOut(APIView):

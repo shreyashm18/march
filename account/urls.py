@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path,include
 from .views import RegisterUser, LogIn, LogOut, getUser
 urlpatterns = [
     # path('register/', views.register,name = 'register'),
@@ -6,4 +6,5 @@ urlpatterns = [
     path('login/', LogIn.as_view(),name = 'login'),
     path('logout/', LogOut.as_view(),name = 'logout'),
     path('getuser/', getUser.as_view(),name = 'getUser'),
+    path('getuser/auth/',include('rest_framework.urls')),
 ]

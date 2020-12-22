@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from covid.models import country_code
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -20,3 +21,9 @@ def country(sender, instance, created, **kwargs):
         User_country.objects.create(user = instance, user_name= str(instance))
     # else:
     #     instance.User_country.save()
+
+class CountryList(models.Model):
+    country = models.CharField(max_length=256)
+
+    def __str__(self):
+        return self.country
