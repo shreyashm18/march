@@ -39,7 +39,7 @@
       {% if user.is_authenticated %}
       <div class="container" style="height:70vh;">
         <div class="row">
-         <form method="GET" class="col s12 form" action="{% url 'corona_report'  %}">
+         <form method="GET" class="col s12 form" action="{% url 'passtoken'  %}">
             {% csrf_token %}
             <table class = 'w-50 table table-light' style="border-radius:10px;background-color:#ffffff;">
             {% for field in form %}
@@ -48,13 +48,16 @@
                 <td>{{ field }}</td>
             </tr>
             {% endfor %} <br>
-            
+            <div>
+        
+              {{form.non_field_errors}}
+              
+            </div>
             </table>
             <button class="btn btn-outline-success input-field col s6 m4 offset-m4 offset-s3" type="submit">Submit</button>
             
           </form>
       </div>
-
       
     
       {% endif %}

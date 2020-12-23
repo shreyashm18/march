@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import CountryList
+from django.contrib import messages
+from django.shortcuts import render,redirect
 
 
 class UserForm(forms.ModelForm):
@@ -14,9 +16,23 @@ class UserForm(forms.ModelForm):
             'password': forms.PasswordInput(),
         }
 
+from rest_framework import exceptions
+
 class InputDataForm(forms.ModelForm):
     country = forms.ModelChoiceField(queryset=CountryList.objects.all(),required=False)
-    Days = forms.IntegerField(required=False)
+    # Days = forms.IntegerField(required=False)
+    start_date = forms.DateField(required=False,widget = forms.widgets.DateInput(attrs={'type': 'date'}))
+    end_date   = forms.DateField(required=False,widget = forms.widgets.DateInput(attrs={'type': 'date'}))
     class Meta:
         model=CountryList
         fields='__all__'
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get("start_date")
+        end_date = cleaned_data.get("end_date")
+        # print(f'cleaned data ={cleaned_data}')
+        
+        if not end_date == None:
+            if end_date <= start_date:
+                raise forms.ValidationError("End date should be greater than start date.")
+        return self.cleaned_data

@@ -3,22 +3,37 @@
 <br>
     <table class="table table-light table-bordered table-striped">
         <tbody>
+        
+        <caption style="caption-side:top; text-align: center;font-weight: bold">
+            {% if start_date%} 
+            Covid report from date {{start_date}} to {{end_date}}
+            {% else %}
+            Covid report of last 15 days
+            {%endif%} 
+        </caption>
+
         <tr>
             <th>Country</th>
             <td>{{country}}</td>
         </tr>
+        {% if Total_patients%}
         <tr>
             <th>Total Cases</th>
-            <td>{{Total_patients}}</td>
+            <td>{{Total_patients}} {{msg}}</td>
         </tr>
+        {%endif%}
+        {% if Total_recovered%}
         <tr>
             <th>Total Recovery</th>
-            <td>{{Total_recovered}}</td>
+            <td>{{Total_recovered}} {{msg}}</td>
         </tr>
+        {%endif%}
+        {% if total_death%}
         <tr>
             <th>Total Deaths</th>
-            <td>{{total_death}}</td>
+            <td>{{total_death}} {{msg}}</td>
         </tr>
+        {%endif%}
         <tr>
             <th>New cases</th>
             <td>{{new_confirmed}}</td>
@@ -33,7 +48,7 @@
         </tr>
         <tr>
             <th>Active Cases</th>
-            <td>{{active_patient}}</td>
+            <td>{{active_patient}} {{msg}}</td>
         </tr>
         <tr>
             <th>Death Rate</th>
@@ -43,10 +58,12 @@
             <th>Recovery Rate</th>
             <td>{{recovery_rate}}</td>
         </tr>
+        {% if cases_per_million_population%}
         <tr>
             <th>Cases Per Million Population</th>
             <td>{{cases_per_million_population}}</td>
         </tr>
+        {%endif%}
     </tbody>
     </table>
     
