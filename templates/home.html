@@ -22,6 +22,7 @@
             {% if user.is_authenticated %}
                   <!-- <li>Hello {{user.first_name}}</a></li> -->
                   <a class="nav-item nav-link" >Hello {{user.first_name}}</a>
+                  <a class="nav-item nav-link" href="{% url 'barchart' %}">Get Data in form of Bar Chart</a>
                   <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
             
                   
@@ -58,6 +59,7 @@
             
           </form>
       </div>
+      
       
     
       {% endif %}

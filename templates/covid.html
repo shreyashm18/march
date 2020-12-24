@@ -6,9 +6,9 @@
         
         <caption style="caption-side:top; text-align: center;font-weight: bold">
             {% if start_date%} 
-            Covid report from date {{start_date}} to {{end_date}}
+            COVID report from date {{start_date}} to {{end_date}}
             {% else %}
-            Covid report of last 15 days
+            COVID report of last 15 days
             {%endif%} 
         </caption>
 
@@ -35,6 +35,10 @@
         </tr>
         {%endif%}
         <tr>
+            <th>Active Cases</th>
+            <td>{{active_patient}} {{msg}}</td>
+        </tr>
+        <tr>
             <th>New cases</th>
             <td>{{new_confirmed}}</td>
         </tr>
@@ -45,10 +49,6 @@
         <tr>
             <th>New Deaths</th>
             <td>{{new_deaths}}</td>
-        </tr>
-        <tr>
-            <th>Active Cases</th>
-            <td>{{active_patient}} {{msg}}</td>
         </tr>
         <tr>
             <th>Death Rate</th>

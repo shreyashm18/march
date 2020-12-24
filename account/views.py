@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from .models import User_country, CountryList
 from covid.models import country_code
 from .forms import UserForm,InputDataForm
+from django.contrib import messages
 # Create your views here.
 
 def home(request):
@@ -77,8 +78,8 @@ class LogIn(APIView):
             return redirect(request.GET["next"])
         
         token,created=Token.objects.get_or_create(user=user)
-        return Response({'Token is':token.key},status=200)
-        # return redirect('home')
+        # return Response({'Token is':token.key},status=200)
+        return redirect('home')
 
 
 class LogOut(APIView):

@@ -14,9 +14,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from account.models import User_country, CountryList
 from account.forms import InputDataForm
-from rest_framework import filters
 import json
+from .calculations import get_last_15_days, get_by_date_range
 
+from . import barchart
+from django.contrib import messages
 
 def passToken(request, time_period = 15):
     print(f'request = {request.user}')
@@ -24,6 +26,10 @@ def passToken(request, time_period = 15):
     print(f'token = {token.key}')
     print(f'request from passToken = {request.GET}')
     
+    form = InputDataForm(request.GET)
+    if not form.is_valid():
+        return render(request, 'home.html', { 'form':form })
+
     data = {
         "country": request.GET['country'],
         "start_date": request.GET['start_date'], 
@@ -44,73 +50,13 @@ def passToken(request, time_period = 15):
 
 class ReportByCountry(APIView):
     queryset = Token.objects.all()
-    authentication_classes = [TokenAuthentication] #,SessionAuthentication
-    # permission_classes = [IsAuthenticated]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['key']
+    authentication_classes = [TokenAuthentication,SessionAuthentication]
+    permission_classes = [IsAuthenticated]
 
-    def get_last_15_days(self,data,timeline,time_period,country):
-        
-        today = datetime.today().date()
-        print(f'time period = {time_period}')
-        time_period = today - timedelta(days=time_period)
-        latest_data = data['latest_data']
-        calculated = latest_data['calculated']
-
-        dict ={'country':country,'Total_patients':latest_data['confirmed'],'Total_recovered':latest_data['recovered'],
-                'new_confirmed':0,'new_recovered':0,'total_death':latest_data['deaths'],'new_deaths':0,'active_patient':latest_data['critical'],
-                'death_rate':calculated['death_rate'],'recovery_rate':calculated['recovery_rate'],
-                'cases_per_million_population':calculated['cases_per_million_population'],'msg':''}
-        
-        for i in timeline:
-            new_date = i.get('date')
-            new_date = datetime.strptime(new_date,'%Y-%m-%d').date()
-            if not new_date < time_period:
-                # print(i.get('date'))
-                dict['new_confirmed'] += i.get('new_confirmed')
-                dict['new_recovered'] += i.get('new_recovered')
-                dict['new_deaths'] += i.get('new_deaths')
-            # print("\n")
-        return dict
-
-    def get_by_date_range(self,data,timeline,country,start_date,end_date):
-        dict ={'country':country,'Total_patients':0,'Total_recovered':0,'new_confirmed':0,'new_recovered':0,'total_death':0,'new_deaths':0,
-            'active_patient':0,'death_rate':0,'recovery_rate':0,'start_date':start_date,'end_date':end_date,'msg':f" (till {end_date})"}
-        
-        start_date = datetime.strptime(start_date,'%Y-%m-%d').date()
-        end_date = datetime.strptime(end_date,'%Y-%m-%d').date()
-        count = 0
-
-        for i in timeline:
-            new_date = i.get('date')
-            new_date = datetime.strptime(new_date,'%Y-%m-%d').date()
-            
-            if not (new_date < start_date or new_date > end_date):
-                # print(i.get('date'))
-                if count == 0:
-                    dict['Total_patients'] = i.get('confirmed') 
-                    dict['Total_recovered'] = i.get('recovered')
-                    dict['total_death'] = i.get('deaths')
-                dict['new_confirmed'] += i.get('new_confirmed')
-                dict['new_recovered'] += i.get('new_recovered')
-                dict['new_deaths'] += i.get('new_deaths')
-                count += 1
-        print(dict)
-        print(count)
-        dict['active_patient'] = dict['Total_patients'] - dict['Total_recovered'] - dict['total_death']
-        dict['death_rate'] = (dict['total_death'] / dict['Total_patients']) * 100
-        dict['recovery_rate'] = (dict['Total_recovered'] / dict['Total_patients']) * 100
-        return dict
-        
-    
     def post(self,request, time_period = 15):
         
         # print(request.user.username)
         # print(f'data from post method {request.POST}')
-
-        form = InputDataForm(request.POST)
-        if not form.is_valid():
-            return render(request, 'home.html', { 'form':form })
         
         endpoint = "http://corona-api.com/countries/"
         if request.POST.get('country'):
@@ -140,13 +86,38 @@ class ReportByCountry(APIView):
         timeline = data['timeline']
 
         if not date_status:
-            dict = self.get_last_15_days(data=data,timeline=timeline,time_period=time_period,country=country)
+            dict = get_last_15_days(data=data,timeline=timeline,time_period=time_period,country=country)
         else:
-            dict = self.get_by_date_range(data=data,timeline=timeline,country=country,start_date=start_date,end_date=end_date)
-        ###########################################################################
+            dict = get_by_date_range(data=data,timeline=timeline,country=country,start_date=start_date,end_date=end_date)
+        
         # return render(request,'covid.html',dict)
-        # return redirect('home')
         return Response(dict)
+from .gmailAPI import sendEmail
+class GetBarChart(APIView):
+
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self,request):
+        return render(request,'barchart.html')
+    def post(self,request):
+        mail_id = request.POST['email']
+        print(f"entered email {request.POST['email']}")
+        endpoint = " https://corona-api.com/countries"
+        resp = requests.get(endpoint)
+        resp = resp.json()
+        pic_location = barchart.plot(resp=resp,mail_id=mail_id)
+        # print(pic_location)
+        try:
+            sendEmail.connect_method(mail_id=mail_id,pic_location=pic_location)
+        except:
+            messages.error(request, 'Error Detected')
+            return redirect('barchart')
+        else:
+            messages.info(request,'Mail sent')
+        return redirect('home')
+
+'''Below code I had written just to insert country name and their code in database '''
 
 # class UpdateCountryCodeDataBase(APIView):
 #     # authentication_classes = [TokenAuthentication]

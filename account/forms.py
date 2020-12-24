@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from .models import CountryList
 from django.contrib import messages
 from django.shortcuts import render,redirect
-
+from datetime import datetime, timedelta
 
 class UserForm(forms.ModelForm):
     password2 = forms.CharField(widget=forms.PasswordInput())
@@ -30,9 +30,12 @@ class InputDataForm(forms.ModelForm):
         cleaned_data = super().clean()
         start_date = cleaned_data.get("start_date")
         end_date = cleaned_data.get("end_date")
-        # print(f'cleaned data ={cleaned_data}')
-        
+        print(f'cleaned data ={cleaned_data}')
+        today = datetime.today().date()
         if not end_date == None:
-            if end_date <= start_date:
-                raise forms.ValidationError("End date should be greater than start date.")
+            if end_date <= today:
+                if end_date <= start_date:
+                    raise forms.ValidationError("End date should be greater than start date.")
+            else:
+                raise forms.ValidationError("End date should not be greater than today.")
         return self.cleaned_data
