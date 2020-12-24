@@ -107,16 +107,16 @@ class GetBarChart(APIView):
         resp = requests.get(endpoint)
         resp = resp.json()
         pic_location = barchart.plot(resp=resp,mail_id=mail_id)
-        # print(pic_location)
+        print(pic_location)
         try:
             sendEmail.connect_method(mail_id=mail_id,pic_location=pic_location)
         except:
-            messages.error(request, 'Error Detected')
+            # messages.error(request, 'Error Detected')
             return redirect('barchart')
         else:
-            messages.info(request,'Mail sent')
-        return redirect('home')
-
+            # messages.info(request,'Mail sent')
+            return redirect('home')
+        # return redirect('home')
 '''Below code I had written just to insert country name and their code in database '''
 
 # class UpdateCountryCodeDataBase(APIView):

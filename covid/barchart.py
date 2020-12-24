@@ -1,6 +1,8 @@
 import requests
 import json
 import matplotlib.pyplot as plt
+from django.conf import settings
+import os
 def plot(resp,mail_id):
 
     New_Colors = ['green','blue','purple','brown','teal','red']
@@ -13,7 +15,10 @@ def plot(resp,mail_id):
     per_million = []
     mail_list = mail_id.split('@')
     pic_name = 'covid_barchart_'+mail_list[0]
-    pic_location = f'D:/{pic_name}.png'
+    f_name = '/'+pic_name + '.png'
+    path=settings.MEDIA_ROOT
+    pic_location = path+'barchart_images'+f_name
+    # print(os.listdir(loc))
     for i in resp['data']:
         if i['name'] in country:
             country_code.append(i['code'])
@@ -30,6 +35,7 @@ def plot(resp,mail_id):
     plt.title('Country Vs COVID Cases per million', fontsize=14)
     plt.xlabel('Country', fontsize=14)
     plt.ylabel('Confirmed Cases per 1000000', fontsize=14)
+    path=settings.MEDIA_ROOT
     plt.savefig(pic_location)
     return pic_location
     # plt.grid(True)

@@ -5,6 +5,8 @@ from email.mime.text import MIMEText
 import mimetypes
 from email.mime.image import MIMEImage
 import os
+from django.conf import settings
+
 
 
 class send_email:
