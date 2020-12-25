@@ -56,7 +56,10 @@ class send_email:
       except errors.HttpError as error:
         print(f"An error occurred: {error}")
 def connect_method(mail_id,pic_location):
-  CLIENT_SECRET_FILE = 'D:/interview/task/covid/gmailAPI/credentials.json'
+  path=settings.MEDIA_ROOT
+  key_path = path + 'covid//gmailAPI/credentials.json'
+  # CLIENT_SECRET_FILE = 'D:/interview/task/covid/gmailAPI/credentials.json'
+  CLIENT_SECRET_FILE = key_path
   API_NAME = 'gmail'
   API_VERSION = 'v1'
   SCOPES = ['https://mail.google.com/']

@@ -57,7 +57,9 @@ class ReportByCountry(APIView):
         
         # print(request.user.username)
         # print(f'data from post method {request.POST}')
-        
+        # form = InputDataForm(request.POST)
+        # if not form.is_valid():
+        #     return render(request, 'home.html', { 'form':form })
         endpoint = "http://corona-api.com/countries/"
         if request.POST.get('country'):
             country = (CountryList.objects.get(id = request.POST['country'])).country
